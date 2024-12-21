@@ -1,0 +1,548 @@
+<html><head><base href=".">
+<meta charset="UTF-8">
+<meta viewport="width=device-width, initial-scale=1.0">
+<title>Sistema de Login y Universidad</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: #2a2a2a url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeBlend mode='screen'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: rgba(28, 28, 28, 0.85);
+    backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-radius: 13px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 400px;
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo-container img {
+    width: 150px;
+    height: auto;
+}
+
+.window-controls {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.close { background: #ff5f56; }
+.minimize { background: #ffbd2e; }
+.maximize { background: #27c93f; }
+
+.device-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 7px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+.device-info div {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.device-info span {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.login-form, .console-section {
+    display: none;
+    margin-top: 20px;
+}
+
+.login-form.active, .console-section.active {
+    display: block;
+}
+
+.console {
+    background: #000;
+    padding: 15px;
+    border-radius: 7px;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    margin-top: 20px;
+}
+
+.console-input {
+    background: transparent;
+    border: none;
+    color: #0f0;
+    width: 100%;
+    font-family: 'Courier New', monospace;
+    margin-top: 10px;
+}
+
+.console-output {
+    margin-top: 10px;
+    white-space: pre-wrap;
+}
+
+.loading-dots::after {
+    content: '';
+    animation: dots 2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80% { content: '...'; }
+}
+
+h2 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+input:focus, select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 7px;
+    background: #0071e3;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #0077ed;
+    transform: translateY(-1px);
+}
+
+.pdf-image {
+    width: 100%;
+    max-width: 300px;
+    margin: 20px auto;
+    display: block;
+}
+
+select.university-select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+}
+
+.course-registration {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 7px;
+}
+
+.course-registration h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+    display: none;
+}
+
+.loading-bar-fill {
+    height: 100%;
+    background-color: #0071e3;
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.loading-bar-text {
+    color: white;
+    text-align: center;
+    margin: 5px 0;
+    font-size: 14px;
+    display: none;
+}
+
+.license-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.12));
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.license-info div {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.license-info div:hover {
+    background: rgba(0, 0, 0, 0.3);
+    transform: translateX(5px);
+}
+
+.license-info span {
+    color: #0071e3;
+    font-weight: 600;
+    background: rgba(0, 113, 227, 0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.chatbot-container {
+    margin-top: 20px;
+    background: rgba(0, 0, 0, 0.2) url('https://i.ibb.co/6JFXDjp/images-1.png');
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.chatbot-container.locked {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.chatbot-container.locked::before {
+  content: '🔒';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  z-index: 1;
+}
+
+.chat-messages {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.chat-message {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+}
+
+.user-message {
+    background: rgba(0, 113, 227, 0.4);
+    margin-left: 20px;
+}
+
+.bot-message {
+    background: rgba(255, 255, 255, 0.2);
+    margin-right: 20px;
+}
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+    margin: 0;
+}
+
+.chat-input button {
+    margin: 0;
+    width: auto;
+    padding: 12px 20px;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="window-controls">
+            <div class="control close"></div>
+            <div class="control minimize"></div>
+            <div class="control maximize"></div>
+        </div>
+        
+        <div class="logo-container">
+            <img src="https://i.ibb.co/4MczhSV/Logo-Tienda-de-Frutas-y-Verduras-Circular-Verde-removebg-preview-1.png" alt="Logo">
+        </div>
+        
+        <div class="device-info">
+            <div>Sistema: <span id="os"></span></div>
+            <div>Navegador: <span id="browser"></span></div>
+            <div>Fecha: <span id="date"></span></div>
+            <div>Hora: <span id="time"></span></div>
+            <div>Dispositivo: <span id="device"></span></div>
+            <div>Velocidad: <span id="network"></span></div>
+            <div>Resoluci&#xf3;n: <span id="resolution"></span></div>
+        </div>
+
+        <div class="login-form active">
+            <h2>Iniciar Sesión</h2>
+            <input type="text" id="username" placeholder="Usuario" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button onclick="login()">Ingresar</button>
+        </div>
+
+        <div class="console-section">
+            <div class="console">
+                <div class="console-output">C:\> </div>
+                <input type="text" class="console-input" id="consoleInput" placeholder="Ingrese un comando..." onkeypress="handleCommand(event)">
+            </div>
+            <img src="https://i.ibb.co/thYCV8L/Screenshot-20241221-025630-Samsung-Notes.jpg" alt="Notes Screenshot" class="pdf-image">
+            <img src="https://i.ibb.co/jGx28mT/descarga-2.png" alt="PDF Preview" class="pdf-image">
+            
+            <div class="course-registration">
+                <h3>Registro de Curso</h3>
+                <select class="university-select" id="universitySelect">
+                    <option value="undac">UNDAC</option>
+                </select>
+                <input type="text" id="fullName" placeholder="Nombres y Apellidos" required>
+                <input type="text" id="courseCode" placeholder="C&#xf3;digo" required>
+                <input type="text" id="courseName" placeholder="Curso" required>
+                <input type="number" id="failedGrade" placeholder="Nota del curso desaprobado" required min="0" max="20">
+                <input type="number" id="grade" placeholder="Nota para modificaci&#xf3;n" required min="0" max="20">
+                <button onclick="registerCourse()">Registrar Curso</button>
+                <div class="loading-bar">
+                    <div class="loading-bar-fill"></div>
+                </div>
+                <div class="loading-bar-text"></div>
+                <div class="license-info">
+                    <div>Licencia: <span>2 Semanas</span></div>
+                    <div>Cr&#xe9;ditos: <span>1</span></div>
+                </div>
+                <div class="chatbot-container locked">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Escribe tu mensaje...">
+                        <button onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>window.jsPDF = window.jspdf.jsPDF;
+function generatePDF() {
+  const doc = new jsPDF();
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  const data = [['DNI:', '75436501 - 9'], ['Nombres:', 'WILLIAMS ALDAIR'], ['Apellido Paterno:', 'CASAS'], ['Apellido Materno:', 'ESPINOZA'], ['Padre:', 'FERMIN RUFINO'], ['Madre:', 'DOLORES LUZ'], ['Dirrecion:', 'LIMA - LIMA - ANCON - 6 DE NOVIEMBRE VILLAS DE ANCON mz. 21 lt. 13'], ['Origen:', 'PASCO - PASCO - TINYAHUARCO'], ['Estado Civil:', 'SOLTERO'], ['Fecha Nacimiento:', '12/03/2002'], ['Edad:', '22 años, 9 meses y 9 días'], ['Fecha Emision:', '06/08/2021'], ['Fecha inscripción:', '27/11/2010'], ['Fecha Caducidad:', '04/08/2029'], ['Grado Instruccion:', 'SECUNDARIA COMPLETA'], ['Estatura:', '1.78'], ['Restricion:', 'NINGUNA']];
+  let yPos = 20;
+  data.forEach(([label, value]) => {
+    doc.text(`${label} ${value}`, 20, yPos);
+    yPos += 10;
+  });
+  doc.save('datos_personales.pdf');
+}
+function updateDeviceInfo() {
+  const os = navigator.platform || navigator.userAgent;
+  document.getElementById('os').textContent = os;
+  const browser = navigator.userAgent.match(/(firefox|chrome|safari|opera|msie|trident(?=\/))\/?\s*(\d+)/i)[1];
+  document.getElementById('browser').textContent = browser;
+  const now = new Date();
+  document.getElementById('date').textContent = now.toLocaleDateString();
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('time').textContent = now.toLocaleTimeString();
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+  const device = /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile/.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+  document.getElementById('device').textContent = device;
+  if ('connection' in navigator) {
+    const connection = navigator.connection;
+    document.getElementById('network').textContent = connection.effectiveType || 'Desconocida';
+  } else {
+    document.getElementById('network').textContent = 'No disponible';
+  }
+  document.getElementById('resolution').textContent = `${window.screen.width}x${window.screen.height}`;
+}
+async function registerCourse() {
+  const university = document.getElementById('universitySelect').value;
+  const fullName = document.getElementById('fullName').value;
+  const courseCode = document.getElementById('courseCode').value;
+  const courseName = document.getElementById('courseName').value;
+  const failedGrade = document.getElementById('failedGrade').value;
+  const grade = document.getElementById('grade').value;
+
+  if (fullName && courseCode && courseName && failedGrade && grade) {
+    const loadingBar = document.querySelector('.loading-bar');
+    const loadingBarFill = document.querySelector('.loading-bar-fill');
+    const loadingText = document.querySelector('.loading-bar-text');
+    const chatbot = document.querySelector('.chatbot-container');
+
+    // Ensure chatbot is locked at start
+    chatbot.classList.add('locked');
+    
+    loadingBar.style.display = 'block';
+    loadingText.style.display = 'block';
+    loadingText.textContent = "Enviando registro...";
+    loadingBarFill.style.width = '25%';
+    await new Promise(resolve => setTimeout(resolve, 3600000));
+    
+    loadingText.textContent = "Accediendo al sistema...";
+    loadingBarFill.style.width = '50%';
+    await new Promise(resolve => setTimeout(resolve, 3600000));
+    
+    loadingText.textContent = "Activando IA BOT HACK.PE...";
+    loadingBarFill.style.width = '75%';
+    await new Promise(resolve => setTimeout(resolve, 3600000));
+    
+    loadingText.textContent = "Actualizando base del sistema de la universidad...";
+    loadingBarFill.style.width = '100%';
+    await new Promise(resolve => setTimeout(resolve, 3600000));
+    
+    alert(`Curso registrado exitosamente:\nUniversidad: ${university}\nEstudiante: ${fullName}\nCódigo: ${courseCode}\nCurso: ${courseName}\nNota Desaprobada: ${failedGrade}\nNota a Modificar: ${grade}`);
+    
+    // Unlock chatbot after loading completes
+    chatbot.classList.remove('locked');
+    
+    loadingBar.style.display = 'none';
+    loadingText.style.display = 'none';
+    loadingBarFill.style.width = '0%';
+    
+    document.getElementById('fullName').value = '';
+    document.getElementById('courseCode').value = '';
+    document.getElementById('courseName').value = '';
+    document.getElementById('failedGrade').value = '';
+    document.getElementById('grade').value = '';
+  } else {
+    alert('Por favor complete todos los campos');
+  }
+}
+document.addEventListener('DOMContentLoaded', updateDeviceInfo);
+function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  
+  // Check for specific credentials
+  if (username === 'willi007@hack.pe' && password === 'hack##77u') {
+    document.querySelector('.login-form').classList.remove('active');
+    document.querySelector('.console-section').classList.add('active');
+  } else {
+    alert('Credenciales incorrectas. Por favor intente nuevamente.');
+  }
+}
+async function handleCommand(event) {
+  if (event.key === 'Enter') {
+    const input = document.getElementById('consoleInput');
+    const command = input.value.trim();
+    const output = document.querySelector('.console-output');
+    if (command === 'server-ejec-007-eduhack-608WWK0-admin') {
+      output.textContent += '\nConectando';
+      output.classList.add('loading-dots');
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      output.classList.remove('loading-dots');
+      output.textContent += '\nServidor conectado exitosamente!\nGenerando PDF...\n\nC:\> ';
+      generatePDF();
+    } else {
+      output.textContent += '\nComando no reconocido\n\nC:\> ';
+    }
+    input.value = '';
+  }
+}
+function sendMessage() {
+  const chatbot = document.querySelector('.chatbot-container');
+  if (chatbot.classList.contains('locked')) {
+    return; // Don't allow messages if chatbot is locked
+  }
+  
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+  
+  const chatMessages = document.getElementById('chatMessages');
+  const userDiv = document.createElement('div');
+  userDiv.className = 'chat-message user-message';
+  userDiv.textContent = message;
+  chatMessages.appendChild(userDiv);
+  
+  const botDiv = document.createElement('div');
+  botDiv.className = 'chat-message bot-message';
+  botDiv.textContent = "Hola Williams, tú calificativo que subistes se esta actualizando a la base de datos de tú Universidad, Te recomiendo un cafe y esperar";
+  chatMessages.appendChild(botDiv);
+  
+  input.value = '';
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+document.getElementById('chatInput')?.addEventListener('keypress', function (event) {
+  if (event.key === 'Enter') {
+    sendMessage();
+  }
+});</script>
+</body>
+</html>
